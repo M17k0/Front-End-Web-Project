@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=`, initial-scale=1.0">
+  <title>Movie library</title>
+	<link rel="stylesheet" href="/styles/home.css">
+  <script type="module" src="/scripts/home.js" defer></script>
+</head>
+<body>
+  <nav class="home-nav">
+    <img src="/images/logo.jfif" alt="logo" class="logo" />
+    <div class="nav-links">
+      <a href="/favourites.html">Favourites</a>
+      <a href="/watched.html">Watched</a>
+    </div>
+    <div class="user-controls" >
+      <span class="username">Username</span>
+      <button id="logout-button">Log out</button>  
+    </div>
+  </nav>
+  
+  <main class="main-container">
+
+    <div class="movie-list-header">
+      <button id="add-movie" class="btn add-movie-button" onclick="movies.openAddMovieModal()">Add a movie</button>
+    </div>
+
+    <div class="movie-list" id="movie-list">
+    </div>
+
+    <div class="modal-container" >
+      <div id="add-movie-modal" class="modal">
+        <div class="modal-header">
+          <h2>Add a movie</h2>
+          <span class="close-button" onclick="movies.closeAddMovieModal()">&times;</span>
+        </div>
+        <div class="modal-content">
+          <div class="add-movie-header">
+            <input type="text" id="movie-search-bar" placeholder="Search for a movie..." />
+            <button id="add-movie-search-button" class="btn" onclick="movies.searchMovies()">Add Movie</button>
+          </div>
+          <div id="add-movie-results" class="add-movie-results">
+          </div>
+        </div>
+  
+      </div>
+    </div>
+
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="copyright">
+        &copy; 2024 Movie Library. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
