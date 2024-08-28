@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Register</title>
+	<link rel="stylesheet" href="/styles/auth.css">
+	<script src="/scripts/toggle-forms.js" defer></script>
+	<script type="module" src="/scripts/auth.js" defer></script>
+</head>
+
+<body>
+	<div class="container" id="register-container">
+		<h2>Welcome, please register.</h2>
+		<form class="auth-form" id="register-form">
+			<input type="text" name="username" id="register-username" placeholder="Username" required>
+			<input type="email" name="email" id="register-email" placeholder="Email" required>
+			<input type="password" name="password" id="register-password" placeholder="Password" required>
+			<input type="password" name="password" id="register-confirm-password" placeholder="Confirm password" required>
+			<button id="register-button" type="submit">Register</button>
+			<p class="toggle">Already have an account? <a href="#" onclick="toggleAuthForms('login')">Log in</a></p>
+		</form>
+	</div>
+
+	<div class="container" id="login-container">
+		<h2>Welcome, please log in.</h2>
+		<form class="auth-form" id="login-form">
+			<input type="email" name="email" id="login-email" placeholder="Email" required>
+			<input type="password" name="password" id="login-password" placeholder="Password" required>
+			<button id="login-button" type="submit">Log in</button>
+			<p class="toggle">Don't have an account? <a href="#" onclick="toggleAuthForms('register')">Register</a></p>
+		</form>
+	</div>
+</body>
+</html>
