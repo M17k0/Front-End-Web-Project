@@ -47,7 +47,6 @@ document.getElementById("register-button").addEventListener("click", async () =>
 
   try {
     const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
-    console.log(userCredentials);
 
     await updateProfile(userCredentials.user, {
       displayName: name,
@@ -56,9 +55,12 @@ document.getElementById("register-button").addEventListener("click", async () =>
     const user = userCredentials.user;
 
     await set(ref(db, `users/${user.uid}`), {
+      id: user.uid,
       username: name,
       email: email,
     });
+    
+    localStorage.setItem('userId', user.uid);
 
     window.location.href = "/";
   } catch (error) {
@@ -89,11 +91,7 @@ document.getElementById("login-button").addEventListener("click", async () => {
   try {
     const userCredentials = await signInWithEmailAndPassword(auth, email, password);
 
-    localStorage.setItem("user", JSON.stringify({
-      id: userCredentials.user.uid,
-      email: userCredentials.user.email,
-      name: userCredentials.user.displayName,
-    }));
+    localStorage.setItem('userId', userCredentials.user.uid);
 
     window.location.href = "/";
   } catch (error) {

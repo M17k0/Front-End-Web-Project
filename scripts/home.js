@@ -10,6 +10,51 @@ const db = getDatabase(app);
 
 window.movies = window.movies || {};
 
+movies.page = 'movies';
+movies.movies = [];
+movies.sortAsc = null;
+movies.user = null;
+movies.userWatchedMovies = [];
+
+
+window.addEventListener('DOMContentLoaded', async () => {
+  let userId = localStorage.getItem('userId');
+  if (!userId) {
+    window.location.href = '/auth.html';
+  }
+  
+  try
+  {
+    const userSnapshot = await get(ref(db, `users/${userId}`));
+    const user = userSnapshot.val();
+    
+    const watchedSnapshot = await get(ref(db, `userWatchedMovies/${userId}`));
+    const watched = watchedSnapshot.val();
+    
+    movies.user = user;
+    movies.userWatchedMovies = watched || [];
+    
+    document.getElementById('username').innerHTML = user.username;
+    movies.getAllMovies();
+  }
+  catch (error) {
+    movies.logOut();
+  }
+});
+
+
+movies.selectPage = (page) => {
+  movies.closeMovieDetails();
+
+  movies.page = page;
+  document.getElementById('movies-page-link').classList.remove('active');
+  document.getElementById('watched-page-link').classList.remove('active');
+
+  document.getElementById(page + '-page-link').classList.add('active');
+
+  movies.getAllMovies();
+}
+
 movies.openAddMovieModal = () => {
     document.getElementById('add-movie-modal').style.display = 'block';
 }
@@ -67,11 +112,13 @@ movies.addMovieFromSearch = async (movie) => {
     Title: movie.Title,
     Year: movie.Year,
   });
+
+  if (movies.page === 'watched') {
+    movies.saveWatched(movie.imdbID, true);
+  }
+
   movies.getAllMovies();
 }
-
-movies.movies = [];
-movies.sortAsc = null;
 
 movies.getAllMovies = async () => {
   try {
@@ -81,7 +128,11 @@ movies.getAllMovies = async () => {
 
     snapshot.forEach((childSnapshot) => {
       const movie = childSnapshot.val();
-      moviesArr.push(movie);
+
+      if (movies.page === 'movies'
+          || ( movies.page === 'watched' && movies.userWatchedMovies.includes(movie.imdbID))) {
+        moviesArr.push(movie);
+      }
     });
 
     movies.movies = moviesArr;
@@ -90,17 +141,6 @@ movies.getAllMovies = async () => {
     console.error(error);
   }
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-  movies.user = JSON.parse(localStorage.getItem('user'));
-  if (!movies.user
-    || !movies.user.id) {
-    window.location.href = '/auth.html';
-  }
-
-  document.getElementById('username').innerHTML = movies.user.name;
-  movies.getAllMovies();
-});
 
 movies.logOut = () => {
   localStorage.removeItem('user');
@@ -114,7 +154,6 @@ movies.renderMoviesList = () => {
   movies.movies.forEach((movie) => {
     const movieDiv = document.createElement('div');
     movieDiv.className = 'movie-card';
-
     
     const posterImg = document.createElement('img');
     posterImg.src = movie.Poster;
@@ -135,13 +174,29 @@ movies.renderMoviesList = () => {
 
     buttonsDiv.appendChild(moreInfoButton);
 
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'btn danger delete-button';
-    deleteButton.innerHTML = 'Delete';
-    deleteButton.onclick = () => { movies.deleteMovie(movie.imdbID) };
+    const watchedButton = document.createElement('button');
+    if (movies.userWatchedMovies.includes(movie.imdbID)) {
+      watchedButton.className = 'btn accent watched-button';
+      watchedButton.innerHTML = 'Unwatch';
+    }
+    else {
+      watchedButton.className = 'btn watched-button';
+      watchedButton.innerHTML = 'Watched';
+    }
+    watchedButton.onclick = (e) => { movies.toggleWatched(e, movie.imdbID); };
 
-    buttonsDiv.appendChild(deleteButton);
+    buttonsDiv.appendChild(watchedButton);
 
+    if (movies.page === 'movies') {
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'btn danger delete-button';
+      deleteButton.innerHTML = 'Delete';
+      deleteButton.onclick = () => { movies.deleteMovie(movie.imdbID) };
+
+      buttonsDiv.appendChild(deleteButton);
+    } else {
+      buttonsDiv.appendChild(document.createElement('div'));
+    }
     movieDiv.appendChild(buttonsDiv);
 
     div.appendChild(movieDiv);
@@ -169,7 +224,117 @@ movies.toggleTitleSorting = () => {
 }
 
 movies.showMovieDetails = async (imdbID) => {
+  const url = `${omdbConfig.baseUrl}?apikey=${omdbConfig.apiKey}&i=${imdbID}&plot=full`;
 
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+
+    document.getElementById('md-info-title').innerHTML = data.Title;
+    document.getElementById('md-info-year').innerHTML = data.Year;
+    document.getElementById('md-info-runtime').innerHTML = data.Runtime;
+    document.getElementById('md-poster-desktop').src = data.Poster;
+    document.getElementById('md-poster-mobile').src = data.Poster;
+
+    document.getElementById('md-info-plot').innerHTML = data.Plot;
+
+    const populateRow = (rowElement, data) => {
+      rowElement.innerHTML = '';
+      (data || '').split(',').forEach((item) => {
+        const badge = document.createElement('span');
+        badge.className = 'info-badge';
+        badge.innerHTML = item.trim();
+        rowElement.appendChild(badge);
+      });
+    };
+
+    populateRow(document.getElementById('md-info-director'), data.Director);
+    populateRow(document.getElementById('md-info-writer'), data.Writer);
+    populateRow(document.getElementById('md-info-actors'), data.Actors);
+    populateRow(document.getElementById('md-info-genres'), data.Genre);
+    populateRow(document.getElementById('md-info-language'), data.Language);
+
+    let ratingsRow = document.getElementById('md-info-ratings');
+    ratingsRow.innerHTML = '';
+
+    const addRatingBadge = (ratingsRow, ratingSite, ratingValue) => {
+      let ratingBadge = document.createElement('span');
+      ratingBadge.className = 'info-badge';
+      ratingBadge.innerHTML = '<b>' + ratingSite + ':</b> ' + ratingValue;
+      ratingsRow.appendChild(ratingBadge);
+    };
+
+    if (data.imdbRating) {
+      addRatingBadge(ratingsRow, 'IMDB', data.imdbRating);
+    }
+    
+    let rottenTomatoesRating = data.Ratings.find((rating) => rating.Source === 'Rotten Tomatoes')?.Value;
+    if (rottenTomatoesRating) {
+      addRatingBadge(ratingsRow, 'Rotten Tomatoes', rottenTomatoesRating);
+    }
+
+    if (data.Metascore) {
+      addRatingBadge(ratingsRow, 'Metacritic', data.Metascore);
+    }
+
+    document.getElementById('page').style.display = 'none';
+    document.getElementById('movie-details-page').style.display = 'block';
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+movies.closeMovieDetails = () => {
+  document.getElementById('page').style.display = 'block';
+  document.getElementById('movie-details-page').style.display = 'none';
+}
+
+movies.toggleWatched = async (event, imdbID) => {
+  try {
+    let watched = movies.userWatchedMovies.includes(imdbID);
+    watched = !watched;
+
+    await movies.saveWatched(imdbID, watched);
+
+    if (watched) {
+      event.target.className = "btn accent watched-button";
+      event.target.innerHTML = "Unwatch";
+    } else {
+      if (movies.page === 'watched') {
+        movies.movies = movies.movies.filter((movie) => movie.imdbID !== imdbID);
+        movies.renderMoviesList();
+      }
+      else {        
+        event.target.className = "btn watched-button";
+        event.target.innerHTML = "Watched";
+      }
+    }
+  } catch (error) {
+    alert('Error marking movie as watched');
+  }
+}
+
+movies.saveWatched = async (imdbID, watched) => {
+  try {
+    const moviesRef = ref(db, `userWatchedMovies/${movies.user.id}`);
+    const snapshot = await get(moviesRef);
+    let moviesArr = snapshot.val() || [];
+
+    if (moviesArr.includes(imdbID)
+        && !watched) {
+      moviesArr = moviesArr.filter((id) => id !== imdbID);
+    } else if (!moviesArr.includes(imdbID)
+               && watched) {
+      moviesArr.push(imdbID);
+    }
+
+    movies.userWatchedMovies = moviesArr;
+    await set(ref(db, `userWatchedMovies/${movies.user.id}`), moviesArr);
+  } catch (error) {
+    alert('Error marking movie as watched');
+  }
 }
 
 movies.deleteMovie = async (imdbID) => {

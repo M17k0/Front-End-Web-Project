@@ -11,8 +11,9 @@
   <nav class="home-nav">
     <img src="/images/logo.jfif" alt="logo" class="logo" />
     <div class="nav-links">
-      <a href="/favorites.html">Favorites</a>
-      <a href="/watched.html">Watched</a>
+      <a id="movies-page-link" class="active" onclick="movies.selectPage('movies')">All Movies</a>
+      <a id="watched-page-link" onclick="movies.selectPage('watched')">Watched</a>
+      <!-- <a href="/favorites.html">Favorites</a> -->
     </div>
     <div class="user-controls" >
       <span id="username" class="username"></span>
@@ -22,15 +23,83 @@
   
   <main class="main-container">
 
-    <div class="movie-list-header">
-      <button id="add-movie" class="btn add-movie-button" onclick="movies.openAddMovieModal()">Add a movie</button>
+    <div id="page">
+      <div class="movie-list-header">
+        <button id="add-movie" class="btn add-movie-button" onclick="movies.openAddMovieModal()">Add a movie</button>
+      </div>
+  
+      <div class="movie-list-header">
+        <button id="sort-by-title" class="btn sort-button" onclick="movies.toggleTitleSorting()">Toggle title sort</button>
+      </div>
+  
+      <div class="movie-list" id="movie-list"></div>
     </div>
 
-    <div class="movie-list-header">
-      <button id="sort-by-title" class="btn sort-button" onclick="movies.toggleTitleSorting()">Toggle title sort</button>
-    </div>
+    <div id="movie-details-page">
 
-    <div class="movie-list" id="movie-list">
+      <div class="detail-nav-row">
+        <button id="close-details" class="btn accent close-details-button" onclick="movies.closeMovieDetails()">Back</button>
+      </div>      
+
+      <div class="movie-details-container">     
+
+        <div class="details-poster desktop">
+          <img id="md-poster-desktop" />
+        </div>
+        <div class="details-info">
+          <div id="md-info-title" class="details-title"></div>
+          <div class="movie-datarow">
+            <span id="md-info-year" class="info-badge"></span>
+            <span id="md-info-runtime" class="info-badge"></span>
+          </div>
+
+
+          <div class="details-poster mobile">
+            <img id="md-poster-mobile" />
+          </div>
+
+          <div class="details-spacer desktop"></div>
+
+          <div class="movie-datarow">
+            <span class="info-label">Genres: </span>
+            <div id="md-info-genres" class="badges-row"></div>
+          </div>
+
+          <div class="details-spacer"></div>
+
+          <div class="movie-datarow">
+            <span class="info-label">Director:</span>
+            <div id="md-info-director" class="badges-row"></div>
+          </div>
+          <div class="movie-datarow">
+            <span class="info-label">Writer:</span>
+            <div id="md-info-writer" class="badges-row"></div>
+          </div>
+          <div class="movie-datarow">
+            <span class="info-label">Actors:</span>
+            <div id="md-info-actors" class="badges-row"></div>
+          </div>
+
+          <div class="details-spacer"></div>
+
+          <div class="movie-datarow">
+            <div id="md-info-ratings" class="badges-row"></div>
+          </div>
+
+          <div class="details-spacer"></div>
+
+          <div class="movie-datarow">
+            <span class="info-label">Language:</span>
+            <div id="md-info-language" class="badges-row"></div>
+          </div>
+
+          <div class="details-spacer"></div>
+
+          <div>
+            <span id="md-info-plot"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="modal-container" >
