@@ -34,6 +34,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     movies.user = user;
     movies.userWatchedMovies = watched || [];
     
+    document.body.style.display = 'block';
+
     document.getElementById('username').innerHTML = user.username;
     movies.getAllMovies();
   }
