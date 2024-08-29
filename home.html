@@ -11,12 +11,12 @@
   <nav class="home-nav">
     <img src="/images/logo.jfif" alt="logo" class="logo" />
     <div class="nav-links">
-      <a href="/favourites.html">Favourites</a>
+      <a href="/favorites.html">Favorites</a>
       <a href="/watched.html">Watched</a>
     </div>
     <div class="user-controls" >
       <span class="username">Username</span>
-      <button id="logout-button">Log out</button>  
+      <button id="logout-button" class="btn danger">Log out</button>  
     </div>
   </nav>
   
@@ -24,6 +24,10 @@
 
     <div class="movie-list-header">
       <button id="add-movie" class="btn add-movie-button" onclick="movies.openAddMovieModal()">Add a movie</button>
+    </div>
+
+    <div class="movie-list-header">
+      <button id="sort-by-title" class="btn sort-button" onclick="movies.toggleTitleSorting()">Toggle title sort</button>
     </div>
 
     <div class="movie-list" id="movie-list">

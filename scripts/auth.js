@@ -7,7 +7,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// register form
 const form = document.getElementById("register-form");
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -71,7 +70,6 @@ document.getElementById("register-button").addEventListener("click", async () =>
   }
 });
 
-// login form
 const loginForm = document.getElementById("login-form");
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();

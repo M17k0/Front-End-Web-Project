@@ -67,40 +67,103 @@ movies.addMovieFromSearch = async (movie) => {
     Title: movie.Title,
     Year: movie.Year,
   });
+  movies.getAllMovies();
 }
+
+movies.movies = [];
+movies.sortAsc = null;
 
 movies.getAllMovies = async () => {
   try {
     const moviesRef = ref(db, 'movies');
     const snapshot = await get(moviesRef);
-    const movies = [];
+    let moviesArr = [];
 
     snapshot.forEach((childSnapshot) => {
       const movie = childSnapshot.val();
-      movies.push(movie);
+      moviesArr.push(movie);
     });
 
-    const div = document.getElementById('movie-list');
-    div.innerHTML = '';
-
-    movies.forEach((movie) => {
-      const movieDiv = document.createElement('div');
-      movieDiv.className = 'movie-card';
-
-      const posterImg = document.createElement('img');
-      posterImg.src = movie.Poster;
-      movieDiv.appendChild(posterImg);
-
-      const titleDiv = document.createElement('div');
-      titleDiv.className = 'movie-title';
-      titleDiv.innerHTML = movie.Title + ' (' + movie.Year + ')';
-      movieDiv.appendChild(titleDiv);
-
-      div.appendChild(movieDiv);
-    });
+    movies.movies = moviesArr;
+    movies.sortMovies();
   } catch (error) {
     console.error(error);
   }
 }
 
 window.addEventListener('DOMContentLoaded', movies.getAllMovies);
+
+movies.renderMoviesList = () => {
+  const div = document.getElementById('movie-list');
+  div.innerHTML = '';
+
+  movies.movies.forEach((movie) => {
+    const movieDiv = document.createElement('div');
+    movieDiv.className = 'movie-card';
+
+    
+    const posterImg = document.createElement('img');
+    posterImg.src = movie.Poster;
+    movieDiv.appendChild(posterImg);
+    
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'movie-title';
+    titleDiv.innerHTML = movie.Title + ' (' + movie.Year + ')';
+    movieDiv.appendChild(titleDiv);
+    
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.className = 'movie-buttons';
+
+    const moreInfoButton = document.createElement('button');
+    moreInfoButton.className = 'btn more-info-button';
+    moreInfoButton.innerHTML = 'More Info';
+    moreInfoButton.onclick = () => { movies.showMovieDetails(movie.imdbID); };
+
+    buttonsDiv.appendChild(moreInfoButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'btn danger delete-button';
+    deleteButton.innerHTML = 'Delete';
+    deleteButton.onclick = () => { movies.deleteMovie(movie.imdbID) };
+
+    buttonsDiv.appendChild(deleteButton);
+
+    movieDiv.appendChild(buttonsDiv);
+
+    div.appendChild(movieDiv);
+  });
+}
+
+movies.sortMovies = () => {
+  if (movies.sortAsc === null) {
+    movies.sortAsc = true;
+  }
+
+  movies.movies.sort((a, b) => {
+    if (movies.sortAsc) {
+      return a.Title.localeCompare(b.Title);
+    } else {
+      return b.Title.localeCompare(a.Title);
+    }
+  });  
+  movies.renderMoviesList();
+}
+
+movies.toggleTitleSorting = () => {
+  movies.sortAsc = !movies.sortAsc;
+  movies.sortMovies();
+}
+
+movies.showMovieDetails = async (imdbID) => {
+
+}
+
+movies.deleteMovie = async (imdbID) => {
+  let confirm = window.confirm('Are you sure you want to delete this movie?');
+  if (!confirm) {
+    return;
+  }
+
+  await set(ref(db, `movies/${imdbID}`), null);
+  movies.getAllMovies();
+}

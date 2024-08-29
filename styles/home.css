@@ -29,6 +29,15 @@ body {
   border: solid 1px #000;
 }
 
+.btn.danger {
+  background-color: #f05c52;
+  border: solid 1px #91342e;
+}
+
+.btn.danger:hover {
+  background-color: #91342e;
+}
+
 .home-nav {
   display: flex;
   justify-content: space-between;
@@ -69,19 +78,6 @@ body {
 .user-controls a {
   color: var(--primary-color);
   text-decoration: none;
-}
-
-#logout-button {
-  background-color: #f05c52;
-  border-radius: 10px;
-  border: solid 1px #91342e;
-  color: white;
-  padding: 10px;
-  cursor: pointer;
-}
-
-#logout-button:hover {
-  background-color: #91342e;
 }
 
 .movie-list-header {
@@ -196,6 +192,49 @@ body {
 
 .search-result-title {
   font-weight: bold;
+}
+
+.movie-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: auto;
+  max-width: 80vw;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .movie-list {
+    max-width: 100vw;
+    padding: 0 5px;
+  }
+}
+
+.movie-card {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #888;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.movie-card img {
+  height: 250px;
+}
+
+.movie-card .movie-title {
+  flex-grow: 1;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.movie-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: space-between;
 }
 
 .footer {
