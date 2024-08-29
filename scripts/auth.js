@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { firebaseConfig } from "../config/firebase-config.js";
 
@@ -47,6 +47,12 @@ document.getElementById("register-button").addEventListener("click", async () =>
 
   try {
     const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+    console.log(userCredentials);
+
+    await updateProfile(userCredentials.user, {
+      displayName: name,
+    });
+
     const user = userCredentials.user;
 
     await set(ref(db, `users/${user.uid}`), {
@@ -54,17 +60,14 @@ document.getElementById("register-button").addEventListener("click", async () =>
       email: email,
     });
 
-    alert("User registered successfully");
-    
-    window.location.href = "home.html";
+    window.location.href = "/";
   } catch (error) {
-    console.log(error);
     let errorMessage = "An error occurred. Please try again.";
     if (error.code === 'auth/email-already-in-use') {
       errorMessage = "The email address is already in use.";
     } else if (error.code === 'auth/invalid-email') {
       errorMessage = "The email address is invalid.";
-    }
+    } 
     
     alert(errorMessage);
   }
@@ -84,18 +87,24 @@ document.getElementById("login-button").addEventListener("click", async () => {
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("User logged in successfully");
-    window.location.href = "home.html";
+    const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+
+    localStorage.setItem("user", JSON.stringify({
+      id: userCredentials.user.uid,
+      email: userCredentials.user.email,
+      name: userCredentials.user.displayName,
+    }));
+
+    window.location.href = "/";
   } catch (error) {
     console.log(error);
     let errorMessage = "An error occurred. Please try again.";
-    if (error.code === 'auth/user-not-found') {
-      errorMessage = "User not found";
-    } else if (error.code === 'auth/wrong-password') {
-      errorMessage = "Incorrect password";
-    }
-    
+    if (error.code === 'auth/invalid-email') {
+      errorMessage = "Email address is invalid";
+    } 
+    else if (error.code === 'auth/invalid-credential') {
+      errorMessage = "Incorrect email or password";
+    }    
     alert(errorMessage);
   }
 });

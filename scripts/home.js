@@ -91,7 +91,21 @@ movies.getAllMovies = async () => {
   }
 }
 
-window.addEventListener('DOMContentLoaded', movies.getAllMovies);
+window.addEventListener('DOMContentLoaded', () => {
+  movies.user = JSON.parse(localStorage.getItem('user'));
+  if (!movies.user
+    || !movies.user.id) {
+    window.location.href = '/auth.html';
+  }
+
+  document.getElementById('username').innerHTML = movies.user.name;
+  movies.getAllMovies();
+});
+
+movies.logOut = () => {
+  localStorage.removeItem('user');
+  window.location.href = '/auth.html';
+}
 
 movies.renderMoviesList = () => {
   const div = document.getElementById('movie-list');
